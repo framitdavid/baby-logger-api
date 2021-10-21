@@ -1,18 +1,6 @@
-TODOS: 
-* Use ServerResponse within all Services so the Controllers uses the ControllerUtils.   
-  response method to know what to send back to the client. - Continue with this one!!
-
-* Create helpers/utils with validation methods to validate incomming requests.
-
-* Type .env file and use the .env settings whithin the code
-
-
-* Read the code and check if there are something that could be refactored..?
-  Should we create a SecurityUtils witch has the methods for hash the password etc?
-
 # Simple Node/Express RESTful API
-
-Information about the project and the API comes here!
+This API was created just for testing nodejs with express. 
+Work in progress...
 
 ## API Endpoints
 
