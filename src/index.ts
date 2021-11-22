@@ -5,6 +5,7 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 import cors from "cors";
 import routes from "./routes";
+import { limiter } from "./middlewares/RequestLimiter";
 
 dotenv.config();
 const PORT = process.env.PORT || 3001;
@@ -15,6 +16,7 @@ createConnection()
 
     const app: Express = express();
     app.use(cors());
+    app.use(limiter);
     app.use(helmet());
 
     app.use("/api/v1", routes);
