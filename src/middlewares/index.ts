@@ -1,4 +1,5 @@
 export { AuthenticateToken } from "./AuthenticateMiddleware";
+export { apiRequestLimiter } from "./RequestLimiter";
 export { validateSignUpDTO } from "./validations/ValidateSignUpDTO";
 export { validateLoginDTO } from "./validations/ValidateLoginInputDTO";
 export { validateRefreshTokenDTO } from "./validations/ValidateRefreshTokenInputDTO";
