@@ -5,7 +5,14 @@ import { Breastfeeding } from "../models/Breastfeeding";
 import { BreastFeedingService } from "../services";
 import { ControllerUtils } from "../utils";
 
-export const BreastFeedingController = {
+interface IBreastFeedingController {
+  get: (req: Request, res: Response) => void;
+  post: (req: Request, res: Response) => void;
+  patch: (req: Request, res: Response) => void;
+  delete: (req: Request, res: Response) => void;
+}
+
+export const BreastFeedingController: IBreastFeedingController = {
   get: async (req: Request, res: Response) => {
     const user = ControllerUtils.getCurrentUser(req);
     res.send(await BreastFeedingService.get(user.id));
@@ -35,11 +42,11 @@ export const BreastFeedingController = {
     const { id, comment, leftOrRight } = req.body;
 
     const breastfeeding = await BreastFeedingService.getById(id);
-    
+
     if (!breastfeeding) {
       return res.sendStatus(StatusCode.NotFound);
     }
-    
+
     const user = ControllerUtils.getCurrentUser(req);
     if (!ControllerUtils.hasAccessToEntity(breastfeeding, user.id)) {
       return res.sendStatus(StatusCode.Forbidden);
