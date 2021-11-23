@@ -16,7 +16,7 @@ export class Breastfeeding extends BaseEntity {
   @Column()
   comment: string;
   @Column()
-  leftOrRight: "left" | "right";
+  leftOrRight: string;
   @Column()
   dateTime: Date;
   @Column()
