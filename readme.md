@@ -1,12 +1,17 @@
 # Node/Express RESTful API
-This API was created just for fun and for testing nodejs with express. 
-The API includes authentication with bearer token and refresh-token.
+This API was created just for fun and for testing nodejs with express. Allows you to log brestfeeding and diaper changes for your babies.
+To make sure our only have access to information for your own babies, the API includes authentication with bearer token and refresh-token.
+
 
 ## Security
 API has a api request limit per user (ip-based) as measures to avoid DDOS-attack or brute-force attempts.
 The limit is set to 100 requests within 15 minutes.
 
-Upcooming security feature is to blocking users from doing login within the next 30 minutes, if they exceed the maximum login attempts.
+To make sure the information is only given to the right person, the API includes authentication with bearer token and refresh-token.
+
+### Upcooming security features:
+1. Blocking users from doing login within the next 30 minutes, if they exceed the maximum login attempts.
+2. Check if email is confirmed before login is available.
 
 ## API Endpoints
 
