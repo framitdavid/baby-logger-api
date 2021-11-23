@@ -2,8 +2,8 @@
 This API was created just for fun and testing nodejs with express. 
 The API includes authentication with bearer token and refresh-token.
 
-API has a api request limit per user (ip-based) as measures to avoid DDOS or brute-force attempts.
-The limit is set to 100 requests within 15-minutes.
+API has a api request limit per user (ip-based) as measures to avoid DDOS-attack or brute-force attempts.
+The limit is set to 100 requests within 15 minutes.
 
 Upcooming security feature is to blocking users from doing login within the next 30 minutes, if they exceed the maximum login attempts.
  
