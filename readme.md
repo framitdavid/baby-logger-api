@@ -13,6 +13,7 @@ To make sure the information is only given to the right person, the API includes
 1. Blocking users from doing login within the next 30 minutes, if they exceed the maximum login attempts.
 2. Check if email is confirmed before login is available.
 
+
 ## API Endpoints
 
 ### Authentication endpoints
