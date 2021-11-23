@@ -1,5 +1,5 @@
 # Simple Node/Express RESTful API
-This API was created just for fun and testing nodejs with express. 
+This API was created just for fun and for testing nodejs with express. 
 The API includes authentication with bearer token and refresh-token.
 
 API has a api request limit per user (ip-based) as measures to avoid DDOS-attack or brute-force attempts.
