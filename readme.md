@@ -1,4 +1,4 @@
-# Simple Node/Express RESTful API
+# Node/Express RESTful API
 This API was created just for fun and for testing nodejs with express. 
 The API includes authentication with bearer token and refresh-token.
 
