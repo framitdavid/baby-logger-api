@@ -12,9 +12,9 @@ export class DiaperChange extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
   @Column()
-  disaperType: "poop" | "pee" | "poop and pee";
+  disaperType: string;
   @Column()
-  amount: "little" | "medium" | "much";
+  amount: string;
   @Column()
   comment: string;
   @Column()
