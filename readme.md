@@ -35,7 +35,7 @@ To finished the project theres some todos that has to be done.
 1. Blocking users from doing login within the next 30 minutes, if they exceed the maximum login attempts.
 2. Implement is email confirmed feature when signing up.
 3. Implement forgot password feature.
-4. Make sue the serve, build and start works as expected.
+4. Make sure the serve, build and start works as expected.
 5. Implement depandabot to make it easier to update packages.
 
 When the listed todos is done, I consider my self as done with this hobby/demo project.
