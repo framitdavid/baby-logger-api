@@ -92,6 +92,34 @@ export const AuthenticationService: IAuthenticationService = {
   },
 };
 
+const hasExceededAllowedLoginAttempts = async (
+  userId: number
+): Promise<boolean> => {
+  const failedLoginAttempts =
+    await AuthenticationRepository.getAllFailedLoginAttempts(userId).catch(
+      (error) => {
+        // TODO implement logger within the application
+        console.log(error);
+      }
+    );
+
+  if (!failedLoginAttempts) {
+    return true;
+  }
+
+  const now = new Date().valueOf();
+  const MS_PER_MINUTE = 60000;
+  const MINUTES_AGO = 5;
+  const fiveMinutesAgo = new Date(now - MINUTES_AGO * MS_PER_MINUTE);
+
+  const count = failedLoginAttempts.filter(
+    (failedLoginAttempt) => failedLoginAttempt.dateTime > fiveMinutesAgo
+  ).length;
+
+  const hasExceeded = count > 5;
+  return hasExceeded;
+};
+
 const getAuthentication = (user: User): Authenticate => {
   const signUser = {
     ...user,
