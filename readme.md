@@ -1,6 +1,6 @@
 # Node/Express RESTful API
 This API was created just for fun and for testing nodejs with express. API allows you to log brestfeeding and diaper changes for your babies.
-To make sure our only have access to information for your own babies, the API includes authentication with bearer token and refresh-token.
+To make sure you only have access to information for your own babies, the API includes authentication with bearer token and refresh-token.
 
 
 ## Security
