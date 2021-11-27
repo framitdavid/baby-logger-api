@@ -4,6 +4,7 @@ import { User } from "../models";
 
 interface IUserRepository extends IGenericRepository<User> {
   getUserByEmail: (email: string) => Promise<User | undefined>;
+  blockAccount: () => Promise<void>;
 }
 
 export const UserRepository: IUserRepository = {
@@ -12,4 +13,8 @@ export const UserRepository: IUserRepository = {
   getUserByEmail: async (email: string): Promise<User | undefined> => {
     return await getRepository<User>(User).findOne({ where: { email } });
   },
+
+  blockAccount: async (): Promise<void> => {
+    
+  } 
 };

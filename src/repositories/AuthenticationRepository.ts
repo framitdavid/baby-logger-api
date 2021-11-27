@@ -1,11 +1,14 @@
-import { DeleteResult, getRepository } from "typeorm";
+import { DeleteResult, getRepository, MoreThan } from "typeorm";
 import { RefreshToken } from "../models";
 import { FailedLoginAttempt } from "../models/FailedLoginAttempt";
 import { IGenericRepository, GenericRepository } from "./GenericRepository";
 
 interface IAuthenticationRepository extends IGenericRepository<RefreshToken> {
   deleteToken: (refreshToken: string) => Promise<DeleteResult>;
-  getAllFailedLoginAttempts: (userId: number) => Promise<FailedLoginAttempt[]>
+  getFailedLoginAttemptsSince: (
+    dateTime: Date,
+    userId: number
+  ) => Promise<FailedLoginAttempt[]>;
 }
 
 export const AuthenticationRepository: IAuthenticationRepository = {
@@ -15,7 +18,12 @@ export const AuthenticationRepository: IAuthenticationRepository = {
     return getRepository(RefreshToken).delete({ refreshToken });
   },
 
-  getAllFailedLoginAttempts: (userId: number): Promise<FailedLoginAttempt[]> => {
-    return getRepository(FailedLoginAttempt).find({ where: { userId }})
-  }
+  getFailedLoginAttemptsSince: (
+    dateTime: Date,
+    userId: number
+  ): Promise<FailedLoginAttempt[]> => {
+    return getRepository(FailedLoginAttempt).find({
+      where: { userId, dateTime: MoreThan(dateTime) },
+    });
+  },
 };

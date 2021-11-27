@@ -5,6 +5,21 @@ import { UserRepository, AuthenticationRepository } from "../repositories";
 import { StatusCode } from "../enums";
 import { AuthenticationUtils } from "../utils";
 
+const wrongUsernameAndPasswordResponse: ServerResponse<Authenticate> = {
+  entity: null,
+  error: { message: "Wrong username or password" },
+  statusCode: StatusCode.BadRequest,
+};
+
+const exceededLoginAttemptsResponse: ServerResponse<Authenticate> = {
+  entity: null,
+  error: {
+    message:
+      "You have excceded the maximum login attempts, your account is blocked 30 minutes from now.",
+  },
+  statusCode: StatusCode.Forbidden,
+};
+
 interface IAuthenticationService {
   login: (
     username: string,
@@ -20,15 +35,21 @@ export const AuthenticationService: IAuthenticationService = {
     password: string
   ): Promise<ServerResponse<Authenticate>> => {
     const user = await UserRepository.getUserByEmail(username);
-    const pwd =
-      user && AuthenticationUtils.comparePassword(password, user.password);
 
-    if (!user || !pwd) {
-      return {
-        entity: null,
-        error: { message: "Wrong username or password" },
-        statusCode: StatusCode.BadRequest,
-      };
+    if (!user) {
+      return wrongUsernameAndPasswordResponse;
+    }
+
+    if (await isUserAccountBlocked(user)) {
+      return exceededLoginAttemptsResponse;
+    }
+
+    const isWrongPassword =
+      user && !AuthenticationUtils.comparePassword(password, user.password);
+
+    if (isWrongPassword) {
+      await logFailedLoginAttempt(user.id);
+      return wrongUsernameAndPasswordResponse;
     }
 
     const authentication = getAuthentication(user);
@@ -92,32 +113,46 @@ export const AuthenticationService: IAuthenticationService = {
   },
 };
 
+const isUserAccountBlocked = async (user: User): Promise<boolean> => {
+  try {
+    const now = new Date();
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+const logFailedLoginAttempt = async (userId: number): Promise<void> => {
+  // TODO save the login attempt to the database.
+};
+
 const hasExceededAllowedLoginAttempts = async (
   userId: number
 ): Promise<boolean> => {
-  const failedLoginAttempts =
-    await AuthenticationRepository.getAllFailedLoginAttempts(userId).catch(
-      (error) => {
-        // TODO implement logger within the application
-        console.log(error);
-      }
-    );
-
-  if (!failedLoginAttempts) {
-    return true;
-  }
-
-  const now = new Date().valueOf();
+  const dateTimeNow = new Date().valueOf();
   const MS_PER_MINUTE = 60000;
   const MINUTES_AGO = 5;
-  const fiveMinutesAgo = new Date(now - MINUTES_AGO * MS_PER_MINUTE);
+  const fiveMinutesAgo = new Date(dateTimeNow - MINUTES_AGO * MS_PER_MINUTE);
 
-  const count = failedLoginAttempts.filter(
-    (failedLoginAttempt) => failedLoginAttempt.dateTime > fiveMinutesAgo
-  ).length;
+  try {
+    const failedLoginAttempts =
+      await AuthenticationRepository.getFailedLoginAttemptsSince(
+        fiveMinutesAgo,
+        userId
+      );
 
-  const hasExceeded = count > 5;
-  return hasExceeded;
+    if (!failedLoginAttempts) {
+      return false;
+    }
+
+    const countedLoginAttempts = failedLoginAttempts.length;
+    const hasExceeded = countedLoginAttempts > 5;
+    return hasExceeded;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
 };
 
 const getAuthentication = (user: User): Authenticate => {
