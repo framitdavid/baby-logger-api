@@ -17,7 +17,7 @@ describe("Test ControllerUtils.response method", () => {
       entity: {
         firstName: "David",
       },
-      statusCode: StatusCode.Sucess,
+      statusCode: StatusCode.Success,
     };
 
     const result = ControllerUtils.response(mockedResponse);

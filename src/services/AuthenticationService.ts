@@ -1,9 +1,14 @@
 import { DeleteResult, getRepository } from "typeorm";
 import { RefreshToken, User } from "../models";
 import { ServerResponse, Authenticate } from "../interfaces";
-import { UserRepository, AuthenticationRepository } from "../repositories";
+import {
+  UserRepository,
+  AuthenticationRepository,
+  FailedLoginAttemptsRepository,
+} from "../repositories";
 import { StatusCode } from "../enums";
 import { AuthenticationUtils } from "../utils";
+import { FailedLoginAttempt } from "../models/FailedLoginAttempt";
 
 const wrongUsernameAndPasswordResponse: ServerResponse<Authenticate> = {
   entity: null,
@@ -18,6 +23,12 @@ const exceededLoginAttemptsResponse: ServerResponse<Authenticate> = {
       "You have excceded the maximum login attempts, your account is blocked 30 minutes from now.",
   },
   statusCode: StatusCode.Forbidden,
+};
+
+const invalidRefreshTokenResponse: ServerResponse<Authenticate> = {
+  entity: null,
+  error: { message: "Invalid refresh-token" },
+  statusCode: StatusCode.BadRequest,
 };
 
 interface IAuthenticationService {
@@ -40,13 +51,14 @@ export const AuthenticationService: IAuthenticationService = {
       return wrongUsernameAndPasswordResponse;
     }
 
-    if (await isUserAccountBlocked(user)) {
+    if (isUserAccountBlocked(user)) {
       return exceededLoginAttemptsResponse;
     }
 
-    const isWrongPassword =
-      user && !AuthenticationUtils.comparePassword(password, user.password);
-
+    const isWrongPassword = !AuthenticationUtils.comparePassword(
+      password,
+      user.password
+    );
     if (isWrongPassword) {
       await logFailedLoginAttempt(user.id);
       return wrongUsernameAndPasswordResponse;
@@ -56,7 +68,7 @@ export const AuthenticationService: IAuthenticationService = {
 
     return {
       entity: authentication,
-      statusCode: StatusCode.Sucess,
+      statusCode: StatusCode.Success,
     };
   },
 
@@ -67,25 +79,20 @@ export const AuthenticationService: IAuthenticationService = {
       },
     });
 
-    const isRefreshTokenExpired =
-      refreshTokenFromDb &&
-      new Date(refreshTokenFromDb.expireAt).getTime() < new Date().getTime();
+    if (!refreshTokenFromDb) {
+      return invalidRefreshTokenResponse;
+    }
 
-    if (!refreshTokenFromDb || isRefreshTokenExpired) {
-      return {
-        entity: null,
-        error: { message: "Invalid refresh-token" },
-        statusCode: StatusCode.BadRequest,
-      };
+    const isRefreshTokenExpired =
+      new Date(refreshTokenFromDb.expireAt).getTime() < new Date().getTime();
+    if (isRefreshTokenExpired) {
+      return invalidRefreshTokenResponse;
     }
 
     const user = await UserRepository.getById(refreshTokenFromDb.userId);
+
     if (!user) {
-      return {
-        entity: null,
-        error: { message: "Could not refresh the token" },
-        statusCode: StatusCode.ServerError,
-      };
+      return invalidRefreshTokenResponse;
     }
 
     const authentication = getAuthentication(user);
@@ -95,7 +102,7 @@ export const AuthenticationService: IAuthenticationService = {
 
     return {
       entity: authentication,
-      statusCode: StatusCode.Sucess,
+      statusCode: StatusCode.Success,
     };
   },
 
@@ -113,18 +120,20 @@ export const AuthenticationService: IAuthenticationService = {
   },
 };
 
-const isUserAccountBlocked = async (user: User): Promise<boolean> => {
-  try {
-    const now = new Date();
-    return true;
-  } catch (error) {
-    console.log(error);
-    return false;
-  }
+const isUserAccountBlocked = (user: User): boolean => {
+  const blockedUtil = new Date(user.blockedUtil).getTime();
+  const dateTimeNow = new Date().getTime();
+
+  const isAccountBlocked = dateTimeNow < blockedUtil;
+  return isAccountBlocked;
 };
 
 const logFailedLoginAttempt = async (userId: number): Promise<void> => {
-  // TODO save the login attempt to the database.
+  console.log('yeao');
+  await FailedLoginAttemptsRepository.updateOrCreate({
+    userId,
+    dateTime: new Date(),
+  } as FailedLoginAttempt);
 };
 
 const hasExceededAllowedLoginAttempts = async (

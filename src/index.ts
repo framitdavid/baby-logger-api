@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 3001;
 
 createConnection()
   .then(async () => {
-    express.json();
-
     const app: Express = express();
+    app.use(express.json());
+    app.use(express.urlencoded());
     app.use(cors());
     app.use(apiRequestLimiter);
     app.use(helmet());

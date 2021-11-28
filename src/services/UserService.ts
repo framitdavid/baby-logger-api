@@ -29,7 +29,7 @@ export const UserService: IUserService = {
 
     return {
       entity: await getRepository(User).save(newUser),
-      statusCode: StatusCode.Sucess,
+      statusCode: StatusCode.Success,
     };
   },
 };

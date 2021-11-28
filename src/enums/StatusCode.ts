@@ -4,7 +4,7 @@ export enum StatusCode {
   Forbidden = 403,
   NotFound = 404,
   Conflict = 409,
-  Sucess = 200,
+  Success = 200,
   Created = 201,
   NoContent = 204,
   ServerError = 500,

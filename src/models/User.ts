@@ -22,6 +22,8 @@ export class User extends BaseEntity {
   email: string;
   @Column()
   password: string;
+  @Column()
+  blockedUtil: Date;
   @OneToMany(() => Breastfeeding, (breastfeeding) => breastfeeding.user)
   brestfeedings: Breastfeeding[];
   @OneToMany(() => DiaperChange, (diaperChange) => diaperChange.user)

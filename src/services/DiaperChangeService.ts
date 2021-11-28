@@ -24,7 +24,7 @@ export const DiaperChangeService: IDiaperChangeService = {
           dateTime: "DESC",
         },
       }),
-      statusCode: StatusCode.Sucess,
+      statusCode: StatusCode.Success,
     };
   },
 
@@ -43,7 +43,7 @@ export const DiaperChangeService: IDiaperChangeService = {
 
     return {
       entity: diaperChange,
-      statusCode: StatusCode.Sucess,
+      statusCode: StatusCode.Success,
     };
   },
 

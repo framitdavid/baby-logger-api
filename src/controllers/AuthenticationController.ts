@@ -72,7 +72,7 @@ export const AuthenticationController: IAuthenticationController = {
     const user = ControllerUtils.getCurrentUser(req);
     if (user) {
       await AuthenticationService.logout(req.body.token);
-      res.sendStatus(StatusCode.Sucess);
+      res.sendStatus(StatusCode.Success);
       return;
     }
 
