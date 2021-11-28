@@ -1,5 +1,5 @@
 import express from "express";
-import { BreastFeedingController } from "../controllers";
+import { BreastFeedingController } from "@controllers/BreastfeedingController";
 import {
   AuthenticateToken,
   validateBrestfeedingInputDTO,

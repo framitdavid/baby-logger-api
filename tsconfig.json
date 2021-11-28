@@ -13,6 +13,12 @@
     "typeRoots": [
       "@types",
       "./node_modules/@types",
-    ]
+    ],
+    "baseUrl": "src",
+    "paths": {
+      "@controllers/*": ["controllers/*"],
+      "@middlewares/*": ["middlewares/*"]
+    }
   },
+  "exclude": ["./tests/*"]
 }
