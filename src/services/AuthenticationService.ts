@@ -9,6 +9,7 @@ import {
 import { StatusCode } from "../enums";
 import { AuthenticationUtils } from "../utils";
 import { FailedLoginAttempt } from "../models/FailedLoginAttempt";
+import { DateUtils } from "../utils/DateUtils";
 
 const wrongUsernameAndPasswordResponse: ServerResponse<Authenticate> = {
   entity: null,
@@ -16,11 +17,11 @@ const wrongUsernameAndPasswordResponse: ServerResponse<Authenticate> = {
   statusCode: StatusCode.BadRequest,
 };
 
-const exceededLoginAttemptsResponse: ServerResponse<Authenticate> = {
+const userAccountIsBlockedResponse: ServerResponse<Authenticate> = {
   entity: null,
   error: {
     message:
-      "You have excceded the maximum login attempts, your account is blocked 30 minutes from now.",
+      "Your account is blocked 30 minutes from now. Please try to login again after 30 minutes.",
   },
   statusCode: StatusCode.Forbidden,
 };
@@ -52,7 +53,7 @@ export const AuthenticationService: IAuthenticationService = {
     }
 
     if (isUserAccountBlocked(user)) {
-      return exceededLoginAttemptsResponse;
+      return userAccountIsBlockedResponse;
     }
 
     const isWrongPassword = !AuthenticationUtils.comparePassword(
@@ -61,18 +62,20 @@ export const AuthenticationService: IAuthenticationService = {
     );
     if (isWrongPassword) {
       await logFailedLoginAttempt(user.id);
+      await blockUserAccountIfLoginAttemptsHasExceeded(user);
       return wrongUsernameAndPasswordResponse;
     }
 
     const authentication = getAuthentication(user);
-
     return {
       entity: authentication,
       statusCode: StatusCode.Success,
     };
   },
 
-  refreshToken: async (refreshToken: string) => {
+  refreshToken: async (
+    refreshToken: string
+  ): Promise<ServerResponse<Authenticate>> => {
     const refreshTokenFromDb = await getRepository(RefreshToken).findOne({
       where: {
         refreshToken,
@@ -85,6 +88,7 @@ export const AuthenticationService: IAuthenticationService = {
 
     const isRefreshTokenExpired =
       new Date(refreshTokenFromDb.expireAt).getTime() < new Date().getTime();
+
     if (isRefreshTokenExpired) {
       return invalidRefreshTokenResponse;
     }
@@ -129,16 +133,15 @@ const isUserAccountBlocked = (user: User): boolean => {
 };
 
 const logFailedLoginAttempt = async (userId: number): Promise<void> => {
-  console.log('yeao');
   await FailedLoginAttemptsRepository.updateOrCreate({
     userId,
     dateTime: new Date(),
   } as FailedLoginAttempt);
 };
 
-const hasExceededAllowedLoginAttempts = async (
-  userId: number
-): Promise<boolean> => {
+const blockUserAccountIfLoginAttemptsHasExceeded = async (
+  user: User
+): Promise<void> => {
   const dateTimeNow = new Date().valueOf();
   const MS_PER_MINUTE = 60000;
   const MINUTES_AGO = 5;
@@ -148,19 +151,18 @@ const hasExceededAllowedLoginAttempts = async (
     const failedLoginAttempts =
       await AuthenticationRepository.getFailedLoginAttemptsSince(
         fiveMinutesAgo,
-        userId
+        user.id
       );
 
-    if (!failedLoginAttempts) {
-      return false;
+    const hasExceeded = failedLoginAttempts.length > 5;
+    if (hasExceeded) {
+      UserRepository.updateOrCreate({
+        ...user,
+        blockedUtil: DateUtils.addMinutes(new Date(), 30),
+      } as User);
     }
-
-    const countedLoginAttempts = failedLoginAttempts.length;
-    const hasExceeded = countedLoginAttempts > 5;
-    return hasExceeded;
   } catch (error) {
     console.log(error);
-    return false;
   }
 };
 

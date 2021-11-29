@@ -8,6 +8,7 @@ export const validateLoginDTO = (
   res: Response,
   next: NextFunction
 ): void => {
+  console.log({ body: req.body });
   const { username, password } = req.body;
 
   const modelState = ValidationUtils.createModelState([
